@@ -79,7 +79,7 @@ module.exports = {
         listeners: {
             /*
                 Defining emitters & accessing via
-                > await fastify.emit.example();
+                > await fastify.emit('example', payload);
 
                 @Warn
                 payload will be come a object when sending
@@ -101,12 +101,11 @@ module.exports = {
         decorator: 'sub',
         listeners: {
             /*
-                Defining emitters & accessing via
-                > await fastify.emit.example();
+                Defining emitters
 
                 @Extra
                 You alsoa ble directly access this method by
-                > await fasitfy.sub.example(payload);
+                > await fasitfy.sub('example', payload);
             */
             example: async (payload) => {}
         }

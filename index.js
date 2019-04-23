@@ -13,13 +13,12 @@ module.exports = Plugin(
             const requester = new CoteRequester({ name: opts.name });
             const emits_decorator = {};
             for (const event in opts.emitters.listeners) {
-                emits_decorator[event] = async (payload) => 
-                    await requester.send({
-                        type: event,
-                        payload: await opts.emitters.listeners[emitter](payload, opts.services.items)
-                    });
+                emits_decorator[event] = (payload) => requester.send({
+                    type: event,
+                    payload: await opts.emitters.listeners[emitter](payload, opts.services.items)
+                });
             }
-            fastify.decorate(opts.emitters.decorator, emits_decorator);
+            fastify.decorate(opts.emitters.decorator, (event, payload) => emits_decorator[event](payload));
         }
 
         if (opts.subscribers) {
@@ -31,7 +30,7 @@ module.exports = Plugin(
                 responder.on(event, (payload) => listener(payload.payload, opts.services.items));
                 subs_decorator[event] = (payload) => listener(payload, opts.services.items);
             }
-            fastify.decorate(opts.subscribers.decorator, subs_decorator);
+            fastify.decorate(opts.subscribers.decorator, (event, payload) => subs_decorator[event](payload));
         }
 
         next();
