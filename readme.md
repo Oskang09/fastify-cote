@@ -79,7 +79,7 @@ module.exports = {
         listeners: {
             /*
                 Defining emitters & accessing via
-                > await fastify.emit('example', payload);
+                > await fastify.emit('example:event', payload);
 
                 @Warn
                 payload will be come a object when sending
@@ -88,7 +88,7 @@ module.exports = {
                 >    payload: 
                 > });
             */
-            example: async (payload, services) => {}
+            name: 'example:event',
         }
     },
 

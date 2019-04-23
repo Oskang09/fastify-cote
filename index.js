@@ -12,20 +12,22 @@ module.exports = Plugin(
         if (opts.emitters) {
             const requester = new CoteRequester({ name: opts.name });
             const emits_decorator = {};
-            for (const event in opts.emitters.listeners) {
-                emits_decorator[event] = (payload) => requester.send({
+            for (const name in opts.emitters.listeners) {
+                const event = opts.emitters.listeners[event];
+
+                emits_decorator[name] = (payload) => requester.send({
                     type: event,
-                    payload: await opts.emitters.listeners[emitter](payload, opts.services.items)
+                    payload,
                 });
             }
-            fastify.decorate(opts.emitters.decorator, (event, payload) => emits_decorator[event](payload, opts.services.items));
+            fastify.decorate(opts.emitters.decorator, (name, payload) => emits_decorator[name](payload));
         }
 
         if (opts.subscribers) {
             const responder = new CoteResponder({ name: opts.name });
             const subs_decorator = {};
             for (const event in opts.subscribers.listeners) {
-                const listener = opts.subscribers.listeners[emitter];
+                const listener = opts.subscribers.listeners[event];
 
                 responder.on(event, (payload) => listener(payload.payload, opts.services.items));
                 subs_decorator[event] = (payload) => listener(payload, opts.services.items);

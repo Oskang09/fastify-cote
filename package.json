@@ -1,6 +1,6 @@
 {
   "name": "fastify-cote",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Fastify Cote decorator & helper for reply mechanism plugins",
   "main": "index.js",
   "author": "Oskang09",
