@@ -18,7 +18,7 @@ module.exports = Plugin(
                     payload: await opts.emitters.listeners[emitter](payload, opts.services.items)
                 });
             }
-            fastify.decorate(opts.emitters.decorator, (event, payload) => emits_decorator[event](payload));
+            fastify.decorate(opts.emitters.decorator, (event, payload) => emits_decorator[event](payload, opts.services.items));
         }
 
         if (opts.subscribers) {
@@ -30,7 +30,7 @@ module.exports = Plugin(
                 responder.on(event, (payload) => listener(payload.payload, opts.services.items));
                 subs_decorator[event] = (payload) => listener(payload, opts.services.items);
             }
-            fastify.decorate(opts.subscribers.decorator, (event, payload) => subs_decorator[event](payload));
+            fastify.decorate(opts.subscribers.decorator, (event, payload) => subs_decorator[event](payload, opts.services.items));
         }
 
         next();

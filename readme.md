@@ -88,7 +88,7 @@ module.exports = {
                 >    payload: 
                 > });
             */
-            example: async (payload) => { }
+            example: async (payload, services) => {}
         }
     },
 
@@ -107,7 +107,7 @@ module.exports = {
                 You alsoa ble directly access this method by
                 > await fasitfy.sub('example', payload);
             */
-            example: async (payload) => {}
+            example: async (payload, services) => { }
         }
     }
 };
