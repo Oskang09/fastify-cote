@@ -29,9 +29,17 @@ Registering Plugins
     },
     responder: {
         instance: undefined || 'name' || new CoteResponder(),
-        decorateAs: 'listen',
-        actions: {
+        decorateAs: 'run',
+        /*
+            Defining listeners and these listeners was able to act as 
+            a helpers and invoke when runtime.
 
+            await fastify.run('example', payload);
+        */
+        actions: {
+            example: async function (payload) {
+                this === fastify
+            }
         }
     },
 ```
