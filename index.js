@@ -4,56 +4,72 @@ const CoteResponder = require('cote').Responder;
 
 module.exports = Plugin(
     function (fastify, opts, next) {
-        if (opts.services.expose) { 
-            fastify.decorate(opts.services.decorator, opts.services.items);
-        }
-        
-        if (opts.emitters) {
-            const requester = opts.requester || new CoteRequester({ name: opts.name });
-            const emits_decorator = {};
-            for (const name in opts.emitters.listeners) {
-                const event = opts.emitters.listeners[name];
-
-                emits_decorator[name] = (payload) => requester.send({
-                    type: event,
-                    payload,
-                });
+        if (opts.requester) {
+            const requester = typeof opts.requester === 'string' 
+                ? new CoteRequester({ name: opts.requester })
+                : opts.requester;
+            const decorator = opts.requester.decorator || 'request';
+            const actions = {};
+            for (const name of Object.keys(opts.requester.actions)) {
+                const action = opts.requester.actions[name];
+                actions[name] = function (payload) {
+                    const outgoing = action.beforeRequest 
+                        ? action.beforeRequest(payload)
+                        : payload;
+                    if (outgoing instanceof Promise) {
+                        return new Promise(
+                            async (resolve, reject) => {
+                                try {
+                                    resolve(
+                                        await requester.send({
+                                            type: action.event,
+                                            payload: await outgoing
+                                        })
+                                    );
+                                } catch (error) {
+                                    reject(error);
+                                }
+                            }
+                        );
+                    } else {
+                        return requester.send({
+                            type: action.event,
+                            payload: outgoing
+                        });
+                    }
+                }
+                actions[name].bind(fastify);
             }
-            fastify.decorate(opts.emitters.decorator, async (name, payload) => {
-                if (!emits_decorator[event]) {
-                    throw new Error(`Requester ${event} doesn't exists.`);
+            fastify.decorate(decorator, async (name, payload) => {
+                if (!actions[name]) {
+                    return requester.send({
+                        type: name,
+                        payload
+                    });
                 }
-                const result = await emits_decorator[name](payload);
-                if (result.ok) {
-                    return result.res;
-                } else {
-                    throw result.err;
-                }
+                return actions[name];
             });
         }
 
-        if (opts.subscribers) {
-            const responder = opts.responder || new CoteResponder({ name: opts.name });
-            const subs_decorator = {};
-            for (const event in opts.subscribers.listeners) {
-                const listener = opts.subscribers.listeners[event];
-
-                responder.on(event, (payload) => listener(payload.payload, opts.services.items));
-                subs_decorator[event] = (payload) => listener(payload, opts.services.items);
+        if (opts.responder) {
+            const responder = typeof opts.responder === 'string' 
+                ? new CoteResponder({ name: opts.responder })
+                : opts.responder;
+            const decorator = opts.responder.decorator || 'respond';
+            const actions = {};
+            for (const name of Object.keys(opts.responder.actions)) {
+                const action = opts.responder.actions[name];
+                responder.on(action.event, (payload) => action[name].listener(payload.payload));
+                actions[name] = action[name].listener;
             }
-            fastify.decorate(opts.subscribers.decorator, async (event, payload) => {
-                if (!subs_decorator[event]) {
-                    throw new Error(`Responder ${event} doesn't exists.`);
+            fastify.decorate(decorator, async (name, payload) => {
+                if (!actions[name]) {
+                    throw Error(`Responder ${name} doesn't exists.`);
                 }
-                const result = await subs_decorator[event](payload, opts.services.items);
-                if (result.ok) {
-                    return result.res;
-                } else {
-                    throw result.err;
-                }
+                return actions[name];
             });
         }
-        next();
+        return next();
     },
     {
         fastify: '<=2.3.0',

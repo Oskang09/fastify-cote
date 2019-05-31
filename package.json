@@ -1,6 +1,6 @@
 {
   "name": "fastify-cote",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "Fastify Cote decorator & helper for reply mechanism plugins",
   "main": "index.js",
   "author": "Oskang09",
@@ -14,8 +14,9 @@
     "Oskang09 <developer.oskang@gmail.com> (https://github.com/Oskang09/)"
   ],
   "dependencies": {
-    "cote": "^0.20.0",
     "fastify-plugin": "^1.5.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "cote": "^0.20.0"
+  }
 }
