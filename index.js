@@ -5,49 +5,14 @@ const CoteResponder = require('cote').Responder;
 module.exports = Plugin(
     function (fastify, opts, next) {
         if (opts.requester) {
-            const requester = typeof opts.requester === 'string' 
-                ? new CoteRequester({ name: opts.requester })
-                : opts.requester;
-            const decorator = opts.requester.decorator || 'request';
-            const actions = {};
-            for (const name of Object.keys(opts.requester.actions)) {
-                const action = opts.requester.actions[name];
-                actions[name] = function (payload) {
-                    const outgoing = action.beforeRequest 
-                        ? action.beforeRequest(payload)
-                        : payload;
-                    if (outgoing instanceof Promise) {
-                        return new Promise(
-                            async (resolve, reject) => {
-                                try {
-                                    resolve(
-                                        await requester.send({
-                                            type: action.event,
-                                            payload: await outgoing
-                                        })
-                                    );
-                                } catch (error) {
-                                    reject(error);
-                                }
-                            }
-                        );
-                    } else {
-                        return requester.send({
-                            type: action.event,
-                            payload: outgoing
-                        });
-                    }
+            const requesters = opts.requester.instances;
+            const decorator = opts.requester.decorator || 'getRequester';
+            
+            fastify.decorate(decorator, function(name) {
+                if (!requesters[name]) {
+                    throw Error(`Requester ${name} doesn't exists.`);
                 }
-                actions[name].bind(fastify);
-            }
-            fastify.decorate(decorator, async (name, payload) => {
-                if (!actions[name]) {
-                    return requester.send({
-                        type: name,
-                        payload
-                    });
-                }
-                return actions[name];
+                return requesters[name];
             });
         }
 
@@ -70,9 +35,5 @@ module.exports = Plugin(
             });
         }
         return next();
-    },
-    {
-        fastify: '<=2.3.0',
-        name: 'fasitfy-cote'
     }
 );

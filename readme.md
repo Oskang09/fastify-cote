@@ -18,19 +18,14 @@ const CoteResponder = require('cote').Responder;
 
 fastify.register(fastify_cote, {
     requester: {
-        instance: 'request' || new CoteResponder({ name: 'request' }),
-        decorator: 'emit',
-        actions: {
-            deserializeToken: {
-                event: 'token.deserialize',
-                beforeRequest: function (payload) {
-                    // access fastify instance using `this`
-                }
-            }
+        decorator: 'getRequest',
+        instances: {
+            first: new CoteResponder({ name: 'request' }),
+            server: new CoteResponder({ name: 'request' })
         }
     },
     responder: {
-        instance: 'respond' || new CoteResponder({ name: 'respond' }),
+        instance: 'runService' || new CoteResponder({ name: 'respond' }),
         decorator: 'run',
         actions: {
             updateUser: {
@@ -49,37 +44,23 @@ fastify.register(fastify_cote, {
 
 ```javascript
 module.exports = {
+
     requester: {
-        // Can be `string` or `cote.requester` instances
-        instance: 'request' || new CoteRequester({ name: 'request' }),
-        
-        // Can only be 'string', you would access using `fastify.emit(action, payload);` 
-        decorator: 'emit',
+        // Can only be 'string', you would access using `fastify.getRequester(name);` 
+        decorator: 'getRequester',
+        instances: {
+            // Must be key, `cote.requester` instances
+            first: new CoteResponder({ name: 'request' }),
+            server: new CoteResponder({ name: 'request' })
+        },
 
-        actions: {
-
-            // A custom name for let you access faster or easier when using `decorator`
-            deserializeToken: {
-
-                // Target server-side event name when requesting
-                event: 'token.deserialize',
-
-                // Lifecycle before request make some changes on 'payload' can be async or non-async or undefined.
-                beforeRequest: function (payload) {
-                    // access fastify instance using `this`
-                }
-            }
-        }
         /*
             When trying access requester with these denifition using
-            > const response = await fastify.emit('deserializeToken', { token: 'some_secret_token' });
-
-            Requester will request with 
-            > requester.send({
-            >     type: 'token.deserialize',
-            >     payload: {
-            >         token: 'some_secret_token'
-            >     }
+            > const response = await fastify.getRequester('first').send({
+            >    type: 'event',
+            >    payload: {
+            >        ...data
+            >    }
             > });
         */
     },
@@ -88,7 +69,7 @@ module.exports = {
         instance: 'respond' || new CoteResponder({ name: 'respond' }),
         
         // Can only be 'string', you would access using `fastify.run(action, payload);` 
-        decorator: 'run',
+        decorator: 'runService',
 
         actions: {
 
@@ -106,7 +87,7 @@ module.exports = {
         }
         /*
             When trying access responder with these denifition using
-            > const response = await fastify.run('updateUser', { name: 'oska' });
+            > const response = await fastify.runService('updateUser', { name: 'oska' });
 
             Responder will receive the whole object as payload
             * when accessing using requester, 'payload' only passed into listener.
@@ -123,6 +104,8 @@ module.exports = {
 - 0.0.4 Fix emmiter issues
 - 0.0.5 Planning new & better structure after tested
 - 0.1.0 Better and new structure 
+- 0.1.1 Fix minor issues
+- 0.1.5 Added multiple requester
 
 # Maintainers
 
