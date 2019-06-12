@@ -106,6 +106,7 @@ module.exports = {
 - 0.1.0 Better and new structure 
 - 0.1.1 Fix minor issues
 - 0.1.5 Added multiple requester
+- 0.1.6 Fix minor issues
 
 # Maintainers
 

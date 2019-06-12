@@ -19,7 +19,7 @@ module.exports = Plugin(
         if (opts.responder) {
             const responder = typeof opts.responder === 'string' 
                 ? new CoteResponder({ name: opts.responder })
-                : opts.responder;
+                : opts.responder.instance;
             const decorator = opts.responder.decorator || 'respond';
             const actions = {};
             for (const name of Object.keys(opts.responder.actions)) {
