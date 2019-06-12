@@ -24,14 +24,14 @@ module.exports = Plugin(
             const actions = {};
             for (const name of Object.keys(opts.responder.actions)) {
                 const action = opts.responder.actions[name];
-                responder.on(action.event, (payload) => action[name].listener(payload.payload));
-                actions[name] = action[name].listener;
+                responder.on(action.event, (payload) => action.listener(payload));
+                actions[name] = action.listener;
             }
-            fastify.decorate(decorator, async (name, payload) => {
+            fastify.decorate(decorator, (name, payload) => {
                 if (!actions[name]) {
                     throw Error(`Responder ${name} doesn't exists.`);
                 }
-                return actions[name];
+                return actions[name](payload);
             });
         }
         return next();

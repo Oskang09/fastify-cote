@@ -107,6 +107,8 @@ module.exports = {
 - 0.1.1 Fix minor issues
 - 0.1.5 Added multiple requester
 - 0.1.6 Fix minor issues
+- 0.1.8 Invalid passing listener
+- 0.1.9 Missing payload when run service
 
 # Maintainers
 
