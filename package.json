@@ -17,6 +17,6 @@
     "fastify-plugin": "^1.5.0"
   },
   "devDependencies": {
-    "cote": "^0.20.0"
+    "cote": "^1.0.3"
   }
 }
